@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小升初奥数学习平台 · 智能刷题与知识体系</title>
+<link rel="stylesheet" href="css/style.css">
+<script src="js/vendor/echarts.min.js"></script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-logo">π</div>
+      <div>
+        <div class="brand-name">奥数学堂</div>
+        <div class="brand-sub">小升初 · 七大模块</div>
+      </div>
+    </div>
+    <nav class="nav">
+      <a class="nav-item active" data-page="overview"><span class="nav-ico">🏠</span>概览</a>
+      <a class="nav-item" data-page="study"><span class="nav-ico">📖</span>知识学习</a>
+      <a class="nav-item" data-page="practice"><span class="nav-ico">🎯</span>智能刷题</a>
+      <a class="nav-item" data-page="bank"><span class="nav-ico">📚</span>题库</a>
+      <a class="nav-item" data-page="wrong"><span class="nav-ico">❌</span>错题本<span class="nav-badge" id="wrongBadge">0</span></a>
+      <a class="nav-item" data-page="analytics"><span class="nav-ico">📊</span>学情分析</a>
+      <a class="nav-item" data-page="settings"><span class="nav-ico">⚙️</span>设置</a>
+    </nav>
+    <div class="sidebar-foot" id="sidebarFoot">今日待复习：<b id="dueCount">0</b> 题</div>
+  </aside>
+
+  <main class="main" id="main">
+    <!-- 概览 -->
+    <section class="page active" id="page-overview">
+      <h1 class="page-title">知识体系概览</h1>
+      <div class="stat-cards" id="statCards"></div>
+      <div class="card">
+        <div class="card-title">📐 七大模块知识体系 <span class="muted">（点击模块展开知识点，点击知识点进入学习）</span></div>
+        <div id="overviewTree" class="overview-tree"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🚀 今日推荐</div>
+        <div id="todaySuggest"></div>
+      </div>
+    </section>
+
+    <!-- 知识学习 -->
+    <section class="page" id="page-study">
+      <h1 class="page-title">知识学习 · 交互式教材</h1>
+      <div class="study-layout">
+        <div class="study-tree card" id="studyTree"></div>
+        <div class="study-content card" id="studyContent"></div>
+      </div>
+    </section>
+
+    <!-- 智能刷题 -->
+    <section class="page" id="page-practice">
+      <h1 class="page-title">智能刷题</h1>
+      <div class="practice-modes">
+        <div class="card mode-card">
+          <div class="card-title">🤖 算法推荐刷题</div>
+          <p class="muted">基于记忆曲线（间隔重复）+ 知识体系进度 + 薄弱环节加权，为你自动组卷。</p>
+          <div class="mode-row"><label>今日推荐题数</label><input type="number" id="algoCount" min="1" max="50" value="10"></div>
+          <button class="btn primary" id="btnAlgoStart">生成今日练习</button>
+          <div class="muted small" id="algoExplain"></div>
+        </div>
+        <div class="card mode-card">
+          <div class="card-title">🔍 自主选题刷题</div>
+          <p class="muted">自己指定模块、知识点与难度，从题库自由组卷。</p>
+          <div class="mode-row"><label>模块</label><select id="selModule"></select></div>
+          <div class="mode-row"><label>知识点</label><select id="selTopic"></select></div>
+          <div class="mode-row"><label>难度</label><select id="selDiff"><option value="0">全部</option><option value="1">1星</option><option value="2">2星</option><option value="3">3星</option><option value="4">4星</option><option value="5">5星</option></select></div>
+          <div class="mode-row"><label>题数</label><input type="number" id="selCount" min="1" max="50" value="10"></div>
+          <div class="mode-row"><label><input type="checkbox" id="selWrongOnly"> 仅错题</label></div>
+          <button class="btn" id="btnSelfStart">开始练习</button>
+        </div>
+      </div>
+      <div class="card" id="practiceArea" style="display:none"></div>
+    </section>
+
+    <!-- 题库 -->
+    <section class="page" id="page-bank">
+      <h1 class="page-title">题库 <span class="muted small" id="bankCount"></span></h1>
+      <div class="filters card">
+        <input type="text" id="bankSearch" placeholder="搜索题干关键词…">
+        <select id="bankModule"></select>
+        <select id="bankTopic"></select>
+        <select id="bankDiff"><option value="0">全部难度</option><option value="1">1星</option><option value="2">2星</option><option value="3">3星</option><option value="4">4星</option><option value="5">5星</option></select>
+        <select id="bankStatus"><option value="all">全部状态</option><option value="done">已做</option><option value="undone">未做</option><option value="wrong">错题</option></select>
+      </div>
+      <div id="bankList"></div>
+    </section>
+
+    <!-- 错题本 -->
+    <section class="page" id="page-wrong">
+      <h1 class="page-title">错题本</h1>
+      <div class="card"><div class="card-title">📌 我的错题 <span class="muted small" id="wrongStat"></span></div>
+        <button class="btn" id="btnWrongRedo">重做全部错题</button>
+      </div>
+      <div id="wrongList"></div>
+    </section>
+
+    <!-- 学情分析 -->
+    <section class="page" id="page-analytics">
+      <h1 class="page-title">学情分析 · 数据可视化</h1>
+      <div class="grid2">
+        <div class="card"><div class="card-title">📈 每日刷题量与正确率（近30天）</div><div class="chart" id="chartDaily"></div></div>
+        <div class="card"><div class="card-title">🕸️ 七大模块能力雷达</div><div class="chart" id="chartRadar"></div></div>
+        <div class="card"><div class="card-title">📊 各模块学习进度与刷题量</div><div class="chart" id="chartProgress"></div></div>
+        <div class="card"><div class="card-title">🎯 各模块错误率</div><div class="chart" id="chartError"></div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🧭 阿基米德提问式诊断 · 自主优化</div>
+        <div id="archimedes"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🗂️ 知识点强弱明细</div>
+        <div id="strengthTable"></div>
+      </div>
+    </section>
+
+    <!-- 设置 -->
+    <section class="page" id="page-settings">
+      <h1 class="page-title">设置</h1>
+      <div class="card">
+        <div class="card-title">⚙️ 学习偏好</div>
+        <div class="mode-row"><label>每天刷题数（算法推荐）</label><input type="number" id="setDaily" min="1" max="100"></div>
+        <div class="mode-row"><label>算法探索度（新题占比倾向 0-10，越高越爱出新题）</label><input type="range" id="setExplore" min="0" max="10" step="1"><span id="setExploreVal"></span></div>
+        <button class="btn primary" id="btnSaveSettings">保存设置</button>
+      </div>
+      <div class="card">
+        <div class="card-title">💾 数据管理</div>
+        <p class="muted">学习记录保存在浏览器本地（localStorage）。换设备请导出导入。</p>
+        <button class="btn" id="btnExport">导出数据</button>
+        <button class="btn" id="btnImport">导入数据</button>
+        <input type="file" id="fileImport" accept=".json" style="display:none">
+        <button class="btn danger" id="btnReset">清空所有数据</button>
+      </div>
+      <div class="card"><div class="card-title">ℹ️ 关于</div><p class="muted">本站为小升初奥数自主学习平台，涵盖七大模块知识体系、交互式教材、智能刷题（记忆曲线+知识体系加权）、错题本与学情分析（阿基米德提问法自主优化）。数据仅存本机。</p></div>
+    </section>
+  </main>
+</div>
+
+<!-- 答题弹层 -->
+<div class="modal" id="answerModal" style="display:none">
+  <div class="modal-box">
+    <div class="modal-close" id="answerModalClose">✕</div>
+    <div id="answerModalBody"></div>
+  </div>
+</div>
+
+<script src="js/data-knowledge.js"></script>
+<script src="js/data-questions.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/algorithm.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

@@ -169,6 +169,7 @@
           <span class="tag">${esc(mod.name)}</span><span class="tag">${esc(topic.name)}</span>
           <span class="tag diff">难度 ${stars(q.diff)}</span>
           ${done?'<span class="tag">已做</span>':''}${wrong?'<span class="tag wrong">错题×'+wrong.cnt+'</span>':''}
+          <span class="tag src">📖 ${esc(srcOf(q))}</span>
           <span class="muted" style="margin-left:auto;font-size:12px">#${q.id}</span>
         </div>
         <div class="q-text">${esc(q.q)}</div>
@@ -296,6 +297,7 @@
     fb.innerHTML = `
       <div class="result-box ${ok?'':'wrong'}">
         <b>${ok?'✅ 回答正确！':'❌ 回答错误'}</b>
+        <div class="muted small" style="margin-top:6px">📖 来源：${esc(srcOf(q))}</div>
         <div style="margin-top:6px"><b>你的答案：</b>${esc(user)}　<b>正确答案：</b>${esc(q.ans.replace(/\|/g,' / '))}</div>
         <div class="explain" style="margin-top:8px"><b>解析：</b>${esc(q.explain)}</div>
         ${q.hint?`<div class="muted small" style="margin-top:4px"><b>提示：</b>${esc(q.hint)}</div>`:''}

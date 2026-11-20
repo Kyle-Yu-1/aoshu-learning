@@ -84,6 +84,7 @@ input:focus,select:focus{outline:2px solid #c7d2fe;border-color:var(--primary)}
 .q-item .tag{font-size:11px;border-radius:6px;padding:2px 8px;background:#eef2ff;color:var(--primary)}
 .q-item .tag.diff{background:#fff7ed;color:#c2410c}
 .q-item .tag.wrong{background:#fef2f2;color:var(--bad)}
+.q-item .tag.src{background:#f0fdfa;color:#0f766e;white-space:normal;text-align:left;line-height:1.5}
 .q-item .q-text{margin:8px 0}
 .q-item .q-ans{display:none;background:#f9fafb;border-left:3px solid var(--primary);padding:10px 12px;border-radius:6px;margin-top:8px;font-size:13px}
 .q-item .q-ans.open{display:block}

@@ -129,3 +129,26 @@ table.strength th{background:#f9fafb}
   .grid2,.study-layout{grid-template-columns:1fr}
   .main{padding:16px 12px}
 }
+
+/* ---- 试卷导出打印样式 ---- */
+.paper-item{border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start;background:#fff}
+.paper-item .idx{background:#eef2ff;color:var(--primary);border-radius:8px;min-width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+.paper-item .body{flex:1;font-size:14px}
+.paper-item .opts{margin:4px 0 0;color:#374151;font-size:13px}
+.paper-item .src{margin-top:4px;font-size:12px;color:var(--muted)}
+@media print{
+  body *{visibility:hidden}
+  .print-area, .print-area *{visibility:visible}
+  .print-area{position:absolute;left:0;top:0;width:100%}
+  .no-print{display:none!important}
+}
+.print-doc{font-family:"SimSun","Songti SC",serif;font-size:14px;line-height:1.8;color:#000;padding:24px}
+.print-doc h1{text-align:center;font-size:22px;margin-bottom:6px}
+.print-doc .sub{text-align:center;font-size:13px;color:#333;margin-bottom:16px}
+.print-doc .q{margin:14px 0;page-break-inside:avoid}
+.print-doc .q .t{font-weight:600}
+.print-doc .q .o{margin:2px 0 2px 22px}
+.print-doc .q .src{font-size:11px;color:#555}
+.print-doc .ans{margin:6px 0 0;color:#1a5f3a;font-size:13px}
+.print-doc .ans .exp{color:#333}
+.print-doc hr{border:none;border-top:1px dashed #999;margin:10px 0}

@@ -21,6 +21,7 @@
     if(name === 'practice') renderPractice();
     if(name === 'bank') renderBank();
     if(name === 'wrong') renderWrong();
+    if(name === 'paper') renderPaper();
     if(name === 'analytics') renderAnalytics();
     if(name === 'settings') renderSettings();
     refreshBadges();
@@ -30,6 +31,8 @@
   function refreshBadges(){
     const st = Store.stats();
     $('#wrongBadge').textContent = st.wrong;
+    const paperBadge = $('#paperBadge');
+    if(paperBadge) paperBadge.textContent = (Store.state.paper||[]).length;
     $('#dueCount').textContent = st.due;
   }
 
@@ -177,12 +180,14 @@
         <div style="display:flex;gap:8px">
           <button class="btn sm toggle-ans">查看答案与解析</button>
           <button class="btn sm add-practice">加入今日练习</button>
+          <button class="btn sm add-paper">加入试卷</button>
         </div>
         <div class="q-ans"><b>答案：</b>${esc(q.ans.replace(/\|/g,' / '))}<div class="explain"><b>解析：</b>${esc(q.explain)}</div>${q.hint?`<div class="muted"><b>提示：</b>${esc(q.hint)}</div>`:''}</div>
       </div>`;
     }).join('') : '<p class="muted">没有符合条件的题目。</p>';
     $$('#bankList .toggle-ans').forEach(b => b.addEventListener('click', () => b.closest('.q-item').querySelector('.q-ans').classList.toggle('open')));
     $$('#bankList .add-practice').forEach(b => b.addEventListener('click', () => { addToToday(+b.closest('.q-item').dataset.qid); }));
+    $$('#bankList .add-paper').forEach(b => b.addEventListener('click', () => { addToPaper(+b.closest('.q-item').dataset.qid); }));
   }
   function addToToday(qid){
     if(!window._todayExtra) window._todayExtra = [];
@@ -432,6 +437,116 @@
     };
     const cp = $('#btnCancelPlan');
     if(cp) cp.onclick = () => { Store.state.plan = null; Store.save(); toast('已取消计划'); renderAnalytics(); };
+  }
+
+  /* ========== 组卷与导出 ========== */
+  function addToPaper(qid){
+    const list = Store.state.paper || (Store.state.paper = []);
+    if(list.includes(qid)){ toast('该题已在试卷中'); return; }
+    list.push(qid); Store.save();
+    toast('已加入试卷（' + list.length + ' 题）'); refreshBadges();
+  }
+  function removeFromPaper(qid){
+    Store.state.paper = (Store.state.paper||[]).filter(x => x !== qid);
+    Store.save(); renderPaper(); refreshBadges();
+  }
+  function renderPaper(){
+    const list = Store.state.paper || [];
+    $('#paperStat').textContent = '共 ' + list.length + ' 题';
+    $('#paperTitle').value = Store.state.paperTitle || '小升初奥数测试卷';
+    $('#paperWithAns').checked = Store.state.paperWithAns !== false;
+    $('#paperWithSrc').checked = Store.state.paperWithSrc !== false;
+    $('#paperList').innerHTML = list.length ? list.map((qid, i) => {
+      const q = Store.findQuestion(qid); if(!q) return '';
+      return `<div class="paper-item">
+        <div class="idx">${i+1}</div>
+        <div class="body">
+          <b>${esc(q.q)}</b>
+          ${q.opts ? `<div class="opts">${q.opts.map((o,j)=>String.fromCharCode(65+j)+'. '+esc(o)).join('　')}</div>` : ''}
+          <div class="src">📖 ${esc(srcOf(q))}</div>
+          <button class="btn sm danger" data-rm="${qid}">移除</button>
+        </div>
+      </div>`;
+    }).join('') : '<p class="muted">试卷为空：可以点题库页"加入试卷"，或用上方一键组卷。</p>';
+    $$('#paperList [data-rm]').forEach(b => b.addEventListener('click', () => removeFromPaper(+b.dataset.rm)));
+    // 填充组卷筛选
+    $('#paperModule').innerHTML = '<option value="">全部模块</option>' + KNOWLEDGE.map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join('');
+    const updPaperTopic = () => {
+      const mod = $('#paperModule').value;
+      const list2 = mod ? Store.findModule(mod).topics : KNOWLEDGE.flatMap(m=>m.topics);
+      $('#paperTopic').innerHTML = '<option value="">全部知识点</option>' + list2.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('');
+    };
+    updPaperTopic();
+    $('#paperModule').onchange = updPaperTopic;
+    $('#btnGenPaper').onclick = () => {
+      const mod = $('#paperModule').value, topic = $('#paperTopic').value,
+            diff = +$('#paperDiff').value, n = Math.max(1, Math.min(60, +$('#paperCount').value || 10));
+      let pool = QUESTIONS.filter(q => {
+        if(mod && q.mod !== mod) return false;
+        if(topic && q.topic !== topic) return false;
+        if(diff && q.diff !== diff) return false;
+        return true;
+      });
+      if(pool.length < n){ toast('符合条件的题目只有 ' + pool.length + ' 道'); return; }
+      // 洗牌
+      for(let i=pool.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [pool[i],pool[j]]=[pool[j],pool[i]]; }
+      const picked = pool.slice(0, n);
+      Store.state.paper = (Store.state.paper||[]).concat(picked.map(q=>q.id)).filter((v,i,a)=>a.indexOf(v)===i);
+      Store.save(); renderPaper(); refreshBadges();
+      toast('已抽取 ' + picked.length + ' 题加入试卷');
+    };
+    $('#btnClearPaper').onclick = () => {
+      if(!(Store.state.paper||[]).length){ toast('试卷已为空'); return; }
+      if(confirm('确定清空试卷？')){ Store.state.paper = []; Store.save(); renderPaper(); refreshBadges(); }
+    };
+    $('#btnExportWord').onclick = exportWord;
+    $('#btnExportPdf').onclick = exportPdf;
+  }
+  function buildPaperHTML(){
+    const list = Store.state.paper || [];
+    const title = $('#paperTitle').value || Store.state.paperTitle || '小升初奥数测试卷';
+    const withAns = $('#paperWithAns').checked;
+    const withSrc = $('#paperWithSrc').checked;
+    Store.state.paperTitle = title;
+    Store.state.paperWithAns = withAns;
+    Store.state.paperWithSrc = withSrc;
+    Store.save();
+    let html = `<html><head><meta charset="utf-8"><title>${esc(title)}</title></head><body class="print-doc">
+      <h1>${esc(title)}</h1>
+      <div class="sub">姓名：________　班级：________　得分：________</div>`;
+    list.forEach((qid, i) => {
+      const q = Store.findQuestion(qid); if(!q) return;
+      html += `<div class="q"><div class="t">${i+1}. ${esc(q.q)}</div>`;
+      if(q.opts) html += q.opts.map((o,j)=>`<div class="o">${String.fromCharCode(65+j)}. ${esc(o)}</div>`).join('');
+      if(withSrc) html += `<div class="src">📖 来源：${esc(srcOf(q))}</div>`;
+      if(withAns){
+        html += `<div class="ans">【答案】${esc(q.ans.replace(/\|/g,' / '))}</div>`;
+        html += `<div class="ans exp">【解析】${esc(q.explain)}</div>`;
+      }
+      html += `</div><hr>`;
+    });
+    html += `</body></html>`;
+    return html;
+  }
+  function exportWord(){
+    if(!(Store.state.paper||[]).length){ toast('试卷为空，请先选题'); return; }
+    const html = buildPaperHTML();
+    const blob = new Blob(['\ufeff', html], { type: 'application/msword;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = (Store.state.paperTitle || '小升初奥数测试卷') + '.doc';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast('Word 试卷已下载');
+  }
+  function exportPdf(){
+    if(!(Store.state.paper||[]).length){ toast('试卷为空，请先选题'); return; }
+    const html = buildPaperHTML();
+    const w = window.open('', '_blank', 'width=900,height=700');
+    if(!w){ toast('请允许弹出窗口以导出 PDF'); return; }
+    w.document.write(html);
+    w.document.close();
+    setTimeout(() => { w.focus(); w.print(); }, 500);
   }
 
   /* ========== 设置 ========== */

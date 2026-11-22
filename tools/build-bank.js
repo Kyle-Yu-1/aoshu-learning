@@ -6,7 +6,6 @@ eval(fs.readFileSync(path.join(ROOT,'js/data-knowledge.js'),'utf8'));
 eval(fs.readFileSync(path.join(ROOT,'js/data-questions.js'),'utf8'));
 const K = window.KNOWLEDGE, Q = window.QUESTIONS;
 
-/* 知识点级来源（教材/竞赛体系对照） */
 const TOPIC_SRC = {
  'calc-quick':'学而思秘籍1级·巧算加减法初步；5级·巧算综合；《高思学校竞赛数学导引》计算问题；《举一反三》',
  'calc-lie':'学而思秘籍11级·第1讲分数裂项；《奥数教程》六年级；《高思导引》六年级计算',
@@ -35,7 +34,6 @@ const TOPIC_SRC = {
  'cmb-logic':'学而思秘籍2级·逻辑推理；7级·逻辑推理综合；《高思导引》',
  'cmb-opt':'学而思秘籍9级·必胜策略/棋盘中的数学；10级·数字谜中的最值；12级·算两次；华杯赛组合真题风格'
 };
-/* 逐题精确来源覆盖（真题/特定出处） */
 const Q_SRC = {
  141:'华杯赛三年级组真题风格（123+234+345+456+567 型）',
  213:'人大附中早培真题（4个互不相同自然数和为2025求最大公约数最大值）',
@@ -52,19 +50,22 @@ const Q_SRC = {
  317:'小升初时钟快慢钟真题型',
  338:'小升初时钟快慢钟真题型'
 };
+for(let id=401; id<=420; id++) Q_SRC[id] = '南京外国语学校小升初面测真题（考生回忆版）';
+for(let id=421; id<=430; id++) Q_SRC[id] = '南京玄武外国语学校小升初面谈/分班考真题（考生回忆版）';
+const CUP_SRC = {431:'华杯赛真题风格',432:'华杯赛真题风格',433:'华杯赛真题',434:'华杯赛真题风格',435:'迎春杯真题风格',436:'华杯赛真题风格',437:'华杯赛真题风格',438:'华杯赛真题风格',439:'迎春杯真题风格',440:'迎春杯真题风格',441:'希望杯真题风格',442:'希望杯真题风格',443:'小升初名校真题',444:'小升初名校真题',445:'小升初名校真题',446:'华杯赛真题风格',447:'迎春杯真题风格',448:'华杯赛真题风格',449:'希望杯真题风格',450:'华杯赛真题风格',451:'希望杯真题风格',452:'迎春杯真题风格',453:'小升初名校真题',454:'小升初名校真题',455:'小升初名校真题',456:'希望杯真题风格',457:'华杯赛真题风格',458:'希望杯真题风格',459:'迎春杯真题风格',460:'迎春杯真题风格'};
+Object.assign(Q_SRC, CUP_SRC);
 function srcOf(q){
   const specific = Q_SRC[q.id];
   const topic = TOPIC_SRC[q.topic] || '通用奥数体系';
   return specific ? (specific + '｜' + topic) : topic;
 }
-/* ---------- 生成 js/data-source.js（网站显示来源） ---------- */
+/* 生成 js/data-source.js */
 const srcJs = '/* 题库来源标注（自动生成，勿手改；运行 tools/build-bank.js 重新生成） */\n' +
   'window.SRC = {\n  topic: ' + JSON.stringify(TOPIC_SRC, null, 2).replace(/"/g,"'") + ',\n  q: ' + JSON.stringify(Q_SRC, null, 2).replace(/"/g,"'") + '\n};\n' +
   'function srcOf(q){ var s = window.SRC.q[q.id]; var t = window.SRC.topic[q.topic] || "";\n  return s ? s + "｜" + t : t; }\n';
 fs.writeFileSync(path.join(ROOT,'js/data-source.js'), srcJs, 'utf8');
 console.log('data-source.js written');
-
-/* ---------- 生成 题库/ 文件夹 ---------- */
+/* 生成 题库/ 文件夹 */
 const BANK = path.join(ROOT,'题库');
 if(fs.existsSync(BANK)) fs.rmSync(BANK,{recursive:true,force:true});
 fs.mkdirSync(BANK,{recursive:true});

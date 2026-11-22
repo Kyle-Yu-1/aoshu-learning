@@ -7,6 +7,10 @@
     wrong: {},          // qid -> {cnt, last, okStreak}
     topic: {},          // topicId -> {read:[sectionIndex...], weak:bool, progress:0-1}
     settings: { daily: 10, explore: 5 },
+    paper: [],          // 组卷：题目 id 列表
+    paperTitle: '小升初奥数测试卷',
+    paperWithAns: true,
+    paperWithSrc: true,
     plan: null,         // {targetDate, items:[{topicId, perDay}], created}
     arch: []            // 阿基米德问答记录 {q, a, ts}
   };

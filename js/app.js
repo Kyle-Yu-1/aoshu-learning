@@ -125,6 +125,8 @@
     }));
     $('#btnWeak').onclick = () => { const w = Store.toggleWeak(id); toast(w ? '已标记薄弱，智能刷题将强化该章节' : '已取消薄弱标记'); selectTopic(id); refreshBadges(); };
     $$('#studyContent .show-sol').forEach(b => b.addEventListener('click', () => b.nextElementSibling.classList.toggle('open')));
+    $$('#studyContent .rel-item').forEach(b => b.addEventListener('click', () => goToBankQuestion(+b.dataset.qid, id)));
+    $$('#studyContent .rel-all').forEach(b => b.addEventListener('click', () => goToBankTopic(b.dataset.topic)));
   }
   function renderSection(s, topicId, secIdx){
     if(s.type==='ex') return renderExample(s, topicId, secIdx);
@@ -132,6 +134,7 @@
     if(s.type==='trap') return `<div class="warnbox" style="margin-top:0">⚠️ ${s.html}</div>`;
     if(s.type==='formula') return `<div class="formulabox">${s.html}</div>`;
     if(s.type==='intro') return `<div class="introbox">${s.html}</div>`;
+    if(s.title && s.title.indexOf('真题链接') >= 0) return s.html + relatedBankHtml(topicId);
     return s.html;
   }
   function renderExample(s, topicId, secIdx){
@@ -140,6 +143,29 @@
       <div><button class="btn sm show-sol">显示答案与解析</button></div>
       <div class="sol"><b>答案：</b>${esc(s.a)}<br><b>解析：</b>${esc(s.sol)}</div>
       ${s.sum?`<div class="sumbox">🌟 <b>规律总结：</b>${esc(s.sum)}</div>`:''}</div>`;
+  }
+
+  function relatedBankHtml(topicId){
+    const qs = QUESTIONS.filter(q => q.topic === topicId);
+    if(!qs.length) return '';
+    const real = qs.filter(q => /真题|面测|面谈|分班考|杯赛|竞赛|迎春|希望杯|华罗庚|华杯|名校/.test(srcOf(q)));
+    const list = (real.length ? real : qs).slice(0, 6);
+    return `<div class="relatedbox"><div class="rel-head">📌 本讲配套真题（题库共 ${qs.length} 题，点击题号直达题库）</div>
+      <div class="rel-list">${list.map(q => `<button class="rel-item" data-qid="${q.id}" title="${esc(srcOf(q))}"><b>#${q.id}</b> ${esc(q.q.slice(0,30))}${q.q.length>30?"…":""}</button>`).join("")}</div>
+      <button class="btn sm rel-all" data-topic="${topicId}">查看本讲全部 ${qs.length} 道题 →</button></div>`;
+  }
+  function goToBankTopic(topicId){
+    switchPage('bank');
+    const sel = $('#bankTopic'); if(sel) sel.value = topicId;
+    const kw = $('#bankSearch'); if(kw) kw.value = '';
+    const st = $('#bankStatus'); if(st) st.value = '';
+    const df = $('#bankDiff'); if(df) df.value = '';
+    renderBank();
+  }
+  function goToBankQuestion(qid, topicId){
+    goToBankTopic(topicId);
+    const el = document.querySelector('#bankList .q-item[data-qid="' + qid + '"]');
+    if(el){ el.classList.add('hl-item'); el.scrollIntoView({behavior:'smooth', block:'center'}); }
   }
 
   /* ========== 题库 ========== */

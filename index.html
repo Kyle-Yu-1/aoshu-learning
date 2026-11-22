@@ -109,9 +109,11 @@
         <div class="mode-row"><label>试卷标题</label><input type="text" id="paperTitle" value="小升初奥数测试卷"></div>
         <div class="mode-row"><label><input type="checkbox" id="paperWithAns" checked> 导出时附带答案解析</label></div>
         <div class="mode-row"><label><input type="checkbox" id="paperWithSrc" checked> 标注题目来源</label></div>
+        <p class="muted small">A卷为学生版（无答案，含答题留白）；B卷为家长版（题号对应，附答案解析）。</p>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn" id="btnExportWord">📥 导出 Word（.doc）</button>
-          <button class="btn" id="btnExportPdf">🖨️ 导出 PDF（打印）</button>
+          <button class="btn" id="btnExportA">📄 导出 A卷 Word（学生版）</button>
+          <button class="btn" id="btnExportB">📝 导出 B卷 Word（家长版）</button>
+          <button class="btn" id="btnExportPdf">🖨️ 导出 PDF（A卷+B卷答案）</button>
           <button class="btn danger sm" id="btnClearPaper">清空试卷</button>
         </div>
       </div>

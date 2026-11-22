@@ -499,49 +499,76 @@
       if(!(Store.state.paper||[]).length){ toast('试卷已为空'); return; }
       if(confirm('确定清空试卷？')){ Store.state.paper = []; Store.save(); renderPaper(); refreshBadges(); }
     };
-    $('#btnExportWord').onclick = exportWord;
+    $('#btnExportA').onclick = () => exportWord('A');
+    $('#btnExportB').onclick = () => exportWord('B');
     $('#btnExportPdf').onclick = exportPdf;
   }
-  function buildPaperHTML(){
-    const list = Store.state.paper || [];
-    const title = $('#paperTitle').value || Store.state.paperTitle || '小升初奥数测试卷';
-    const withAns = $('#paperWithAns').checked;
-    const withSrc = $('#paperWithSrc').checked;
-    Store.state.paperTitle = title;
-    Store.state.paperWithAns = withAns;
-    Store.state.paperWithSrc = withSrc;
+  function savePaperPrefs(){
+    Store.state.paperTitle = $('#paperTitle').value || Store.state.paperTitle || '小升初奥数测试卷';
+    Store.state.paperWithAns = $('#paperWithAns').checked;
+    Store.state.paperWithSrc = $('#paperWithSrc').checked;
     Store.save();
-    let html = `<html><head><meta charset="utf-8"><title>${esc(title)}</title></head><body class="print-doc">
-      <h1>${esc(title)}</h1>
-      <div class="sub">姓名：________　班级：________　得分：________</div>`;
-    list.forEach((qid, i) => {
-      const q = Store.findQuestion(qid); if(!q) return;
-      html += `<div class="q"><div class="t">${i+1}. ${esc(q.q)}</div>`;
-      if(q.opts) html += q.opts.map((o,j)=>`<div class="o">${String.fromCharCode(65+j)}. ${esc(o)}</div>`).join('');
-      if(withSrc) html += `<div class="src">📖 来源：${esc(srcOf(q))}</div>`;
-      if(withAns){
-        html += `<div class="ans">【答案】${esc(q.ans.replace(/\|/g,' / '))}</div>`;
-        html += `<div class="ans exp">【解析】${esc(q.explain)}</div>`;
-      }
-      html += `</div><hr>`;
-    });
-    html += `</body></html>`;
-    return html;
+    return Store.state.paperTitle;
   }
-  function exportWord(){
+  function paperHead(title, subTitle){
+    return `<h1>${esc(title)}</h1><div class="sub">${esc(subTitle)}</div>`;
+  }
+  function renderQBody(q, i, withBlank, withAns, withSrc){
+    let h = `<div class="q"><div class="t">${i+1}. ${esc(q.q)}</div>`;
+    if(q.opts){
+      h += q.opts.map((o,j)=>`<div class="o">${String.fromCharCode(65+j)}. ${esc(o)}</div>`).join('');
+      if(withBlank) h += `<div class="blank-line">（　）</div>`;
+    } else if(withBlank){
+      h += `<div class="blank-line">&nbsp;</div><div class="blank-line">&nbsp;</div>`;
+    }
+    if(withAns){
+      h += `<div class="ans">【答案】${esc(q.ans.replace(/\|/g,' / '))}</div>`;
+      h += `<div class="ans exp">【解析】${esc(q.explain)}</div>`;
+    }
+    if(withSrc) h += `<div class="src">📖 来源：${esc(srcOf(q))}</div>`;
+    h += `</div><hr>`;
+    return h;
+  }
+  function buildPaperHTML(mode){
+    const list = Store.state.paper || [];
+    const title = savePaperPrefs();
+    const withSrc = Store.state.paperWithSrc !== false;
+    const head = '<html><head><meta charset="utf-8"><title>' + esc(title) + '</title></head><body class="print-doc">';
+    if(mode === 'A'){
+      let h = head + paperHead(title + '（A卷·学生版）', '姓名：________　班级：________　得分：________　时间：60分钟');
+      list.forEach((qid,i) => { const q=Store.findQuestion(qid); if(q) h += renderQBody(q,i,true,false,false); });
+      h += '</body></html>';
+      return h;
+    }
+    if(mode === 'B'){
+      let h = head + paperHead(title + '（B卷·家长版）', '参考答案与解析（题号与A卷一致）');
+      list.forEach((qid,i) => { const q=Store.findQuestion(qid); if(q) h += renderQBody(q,i,false,true,withSrc); });
+      h += '</body></html>';
+      return h;
+    }
+    let h = head + paperHead(title + '（A卷·学生版）', '姓名：________　班级：________　得分：________　时间：60分钟');
+    list.forEach((qid,i) => { const q=Store.findQuestion(qid); if(q) h += renderQBody(q,i,true,false,false); });
+    h += '<div class="page-break"></div>';
+    h += paperHead('参考答案与解析（B卷·家长版）', '题号与A卷一致');
+    list.forEach((qid,i) => { const q=Store.findQuestion(qid); if(q) h += renderQBody(q,i,false,true,withSrc); });
+    h += '</body></html>';
+    return h;
+  }
+  function exportWord(mode){
     if(!(Store.state.paper||[]).length){ toast('试卷为空，请先选题'); return; }
-    const html = buildPaperHTML();
+    const html = buildPaperHTML(mode);
     const blob = new Blob(['\ufeff', html], { type: 'application/msword;charset=utf-8' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = (Store.state.paperTitle || '小升初奥数测试卷') + '.doc';
+    const label = mode === 'A' ? 'A卷学生版' : 'B卷家长版';
+    a.download = (Store.state.paperTitle || '小升初奥数测试卷') + '-' + label + '.doc';
     a.click();
     URL.revokeObjectURL(a.href);
-    toast('Word 试卷已下载');
+    toast(label + ' Word 已下载');
   }
   function exportPdf(){
     if(!(Store.state.paper||[]).length){ toast('试卷为空，请先选题'); return; }
-    const html = buildPaperHTML();
+    const html = buildPaperHTML('both');
     const w = window.open('', '_blank', 'width=900,height=700');
     if(!w){ toast('请允许弹出窗口以导出 PDF'); return; }
     w.document.write(html);

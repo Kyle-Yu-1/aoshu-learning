@@ -152,3 +152,5 @@ table.strength th{background:#f9fafb}
 .print-doc .ans{margin:6px 0 0;color:#1a5f3a;font-size:13px}
 .print-doc .ans .exp{color:#333}
 .print-doc hr{border:none;border-top:1px dashed #999;margin:10px 0}
+.print-doc .blank-line{border-bottom:1px solid #999;height:26px;margin:2px 0}
+.print-doc .page-break{page-break-before:always}

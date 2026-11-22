@@ -154,3 +154,15 @@ table.strength th{background:#f9fafb}
 .print-doc hr{border:none;border-top:1px dashed #999;margin:10px 0}
 .print-doc .blank-line{border-bottom:1px solid #999;height:26px;margin:2px 0}
 .print-doc .page-break{page-break-before:always}
+/* ---- 知识学习 v2：讲师式讲解样式 ---- */
+.goalbox{background:#eef2ff;border-left:4px solid #6366f1;padding:8px 12px;border-radius:8px;margin:6px 0 4px;font-size:14px;line-height:1.7}
+.posline{color:var(--muted);font-size:12px;margin:0 0 10px}
+.introbox{background:linear-gradient(135deg,#f8fafc,#eef2ff);border-left:4px solid #818cf8;padding:10px 14px;border-radius:10px;font-size:14px;line-height:1.9}
+.tipbox{background:#fffbeb;border-left:4px solid #f59e0b;padding:10px 14px;border-radius:10px;font-size:14px;line-height:1.9}
+.formulabox{background:#f5f3ff;border:1px dashed #a78bfa;padding:8px 14px;border-radius:10px;text-align:center;font-size:15px;line-height:1.9}
+.ex-q{font-size:15px;line-height:1.8;margin-bottom:8px}
+.thinkline{color:#0f766e;background:#f0fdfa;border-left:4px solid #14b8a6;padding:6px 10px;border-radius:6px;margin:6px 0;font-size:14px;line-height:1.8}
+.sumbox{background:#fff7ed;border-left:4px solid #f97316;padding:6px 10px;border-radius:6px;margin-top:8px;font-size:14px;line-height:1.8}
+.exbox .sol{line-height:1.9}
+.section-item .sec-head{font-size:15px}
+.section-item .sec-body p{line-height:1.9;margin:6px 0}

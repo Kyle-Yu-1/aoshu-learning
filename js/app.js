@@ -107,10 +107,12 @@
         <span class="muted small">${esc(mod?mod.name:'')}模块</span>
         <button class="btn sm ${weak?'danger':''}" id="btnWeak">${weak?'⚡ 已标记薄弱（点击取消）':'标记薄弱章节'}</button>
       </div>
+      ${topic.goal?`<div class="goalbox">🎯 <b>本讲目标：</b>${esc(topic.goal)}</div>`:''}
+      ${topic.pos?`<div class="posline">📌 ${esc(topic.pos)}</div>`:''}
       ${topic.sections.map((s, i) => `
         <div class="section-item ${(st.read||[]).includes(i)?'open':''}" data-sec="${i}">
           <div class="sec-head"><span class="arrow">▶</span>${esc(s.title)}</div>
-          <div class="sec-body">${s.type==='ex' ? renderExample(s, id, i) : s.html}</div>
+          <div class="sec-body">${renderSection(s, id, i)}</div>
         </div>`).join('')}
       <div class="keybox"><b>💡 本章要点</b><br>${topic.key.map(k=>'• '+esc(k)).join('<br>')}</div>
       <div class="warnbox"><b>⚠️ 易错点</b><br>${topic.trap.map(k=>'• '+esc(k)).join('<br>')}</div>
@@ -124,10 +126,20 @@
     $('#btnWeak').onclick = () => { const w = Store.toggleWeak(id); toast(w ? '已标记薄弱，智能刷题将强化该章节' : '已取消薄弱标记'); selectTopic(id); refreshBadges(); };
     $$('#studyContent .show-sol').forEach(b => b.addEventListener('click', () => b.nextElementSibling.classList.toggle('open')));
   }
+  function renderSection(s, topicId, secIdx){
+    if(s.type==='ex') return renderExample(s, topicId, secIdx);
+    if(s.type==='tip') return `<div class="tipbox">🧭 <b>名师锦囊</b>${s.html}</div>`;
+    if(s.type==='trap') return `<div class="warnbox" style="margin-top:0">⚠️ ${s.html}</div>`;
+    if(s.type==='formula') return `<div class="formulabox">${s.html}</div>`;
+    if(s.type==='intro') return `<div class="introbox">${s.html}</div>`;
+    return s.html;
+  }
   function renderExample(s, topicId, secIdx){
-    return `<div class="exbox"><b>📝 ${esc(s.q)}</b>
+    return `<div class="exbox"><div class="ex-q">📝 ${esc(s.q)}</div>
+      ${s.think?`<div class="thinkline">💭 <b>思路点拨：</b>${esc(s.think)}</div>`:''}
       <div><button class="btn sm show-sol">显示答案与解析</button></div>
-      <div class="sol"><b>答案：</b>${esc(s.a)}<br><b>解析：</b>${esc(s.sol)}</div></div>`;
+      <div class="sol"><b>答案：</b>${esc(s.a)}<br><b>解析：</b>${esc(s.sol)}</div>
+      ${s.sum?`<div class="sumbox">🌟 <b>规律总结：</b>${esc(s.sum)}</div>`:''}</div>`;
   }
 
   /* ========== 题库 ========== */

@@ -144,6 +144,19 @@
     const list = modId ? Store.findModule(modId).topics : KNOWLEDGE.flatMap(m=>m.topics);
     tSel.innerHTML = '<option value="">全部知识点</option>' + list.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('');
   }
+  /* 知识体系顺序映射：模块→知识点→难度→编号 */
+  let _orderCache = null;
+  function knowledgeOrder(){
+    if(_orderCache) return _orderCache;
+    const map = {}; let idx = 0;
+    KNOWLEDGE.forEach(m => m.topics.forEach(t => {
+      QUESTIONS.filter(q => q.topic === t.id)
+        .sort((a,b) => a.diff - b.diff || a.id - b.id)
+        .forEach(q => { map[q.id] = ++idx; });
+    }));
+    _orderCache = map;
+    return map;
+  }
   function bankFiltered(){
     const kw = $('#bankSearch').value.trim();
     const mod = $('#bankModule').value, topic = $('#bankTopic').value,
@@ -159,6 +172,12 @@
       if(status === 'wrong' && !Store.state.wrong[q.id]) return false;
       return true;
     });
+    const sort = $('#bankSort') ? $('#bankSort').value : 'knowledge';
+    if(sort === 'diffAsc') list.sort((a,b) => a.diff - b.diff || a.id - b.id);
+    else if(sort === 'diffDesc') list.sort((a,b) => b.diff - a.diff || a.id - b.id);
+    else if(sort === 'id') list.sort((a,b) => a.id - b.id);
+    else { const order = knowledgeOrder(); list.sort((a,b) => (order[a.id]||9999) - (order[b.id]||9999)); }
+    return list;
   }
   function renderBank(){
     const list = bankFiltered();
@@ -173,6 +192,7 @@
           <span class="tag diff">难度 ${stars(q.diff)}</span>
           ${done?'<span class="tag">已做</span>':''}${wrong?'<span class="tag wrong">错题×'+wrong.cnt+'</span>':''}
           <span class="tag src">📖 ${esc(srcOf(q))}</span>
+          <span class="muted" style="font-size:12px">体系 #${knowledgeOrder()[q.id]}</span>
           <span class="muted" style="margin-left:auto;font-size:12px">#${q.id}</span>
         </div>
         <div class="q-text">${esc(q.q)}</div>
@@ -194,7 +214,7 @@
     if(!window._todayExtra.includes(qid)) window._todayExtra.push(qid);
     toast('已加入今日练习（' + (window._todayExtra.length) + ' 题）');
   }
-  ['bankSearch','bankModule','bankTopic','bankDiff','bankStatus'].forEach(id => {
+  ['bankSearch','bankModule','bankTopic','bankDiff','bankStatus','bankSort'].forEach(id => {
     const el = document.getElementById(id);
     if(el) el.addEventListener('input', renderBank);
     if(el && el.tagName === 'SELECT') el.addEventListener('change', renderBank);

@@ -81,7 +81,7 @@ K.forEach((m, mi) => {
   fs.mkdirSync(mDir, {recursive:true});
   index += '\n## ' + (mi+1).toString().padStart(2,'0') + ' ' + m.name + '（' + Q.filter(q=>q.mod===m.id).length + ' 题）\n';
   m.topics.forEach((t, ti) => {
-    const qs = Q.filter(q => q.topic === t.id);
+    const qs = Q.filter(q => q.topic === t.id).sort((a,b) => a.diff - b.diff || a.id - b.id);
     if(!qs.length) return;
     const tDir = path.join(mDir, String(ti+1).padStart(2,'0') + '-' + t.name);
     fs.mkdirSync(tDir, {recursive:true});

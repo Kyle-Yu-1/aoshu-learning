@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>题目配图预览</title>
+<style>
+body{font-family:Arial,"Microsoft YaHei",sans-serif;background:#f1f5f9;margin:0;padding:24px;color:#1e293b}
+h1{font-size:20px;margin:0 0 6px}h1 small{font-size:13px;color:#64748b;font-weight:normal}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-top:18px}
+.card{background:#fff;border-radius:12px;padding:12px;box-shadow:0 1px 3px rgba(15,23,42,.08)}
+.card .t{font-size:13px;color:#334155;margin-bottom:4px}
+.card svg{width:100%;height:auto}
+.back{display:inline-block;margin-top:16px;font-size:13px;color:#2563eb;text-decoration:none}
+</style>
+</head>
+<body>
+<h1>📐 题目配图预览 <small>共 20 种图形模板 · 实际题目中已使用 80+ 处</small></h1>
+<div class="grid" id="g"></div>
+<a class="back" href="../">← 返回学习网站</a>
+<script src="../js/figs.js"></script>
+<script src="../js/data-questions.js"></script>
+<script>
+var samples = [
+ ['三角形（燕尾模型）',{t:'poly',p:[[120,30,'A'],[30,150,'B'],[210,150,'C']],s:[[120,30,90,150],[30,150,165,90]],pt:[{x:90,y:150,t:'D'},{x:165,y:90,t:'E'},{x:132,y:104,t:'O'}]}],
+ ['梯形蝴蝶模型',{t:'poly',p:[[80,40,'A'],[160,40,'B'],[210,150,'C'],[30,150,'D']],s:[[80,40,210,150],[160,40,30,150]],pt:[{x:120,y:95,t:'O'}]}],
+ ['扇形',{t:'poly',c:[{x:120,y:100,r:62}],s:[[120,100,120,38],[120,100,182,100]],a:[{x:120,y:100,r:62,a0:-90,a1:0}],pt:[{x:120,y:100,t:'O'}]}],
+ ['月牙（直角三角形三边半圆）',{t:'moons'}],
+ ['羊吃草（墙角扇形）',{t:'sheep',tag:'6×6 草地 · 绳长 6'}],
+ ['半圆+内接三角形',{t:'semi'}],
+ ['正方体（三面涂红角块）',{t:'cube',corner:true}],
+ ['正方体打洞',{t:'cube',hole:true}],
+ ['长方体（一面涂红）',{t:'cuboid',a:6,b:5,c:4,face:true}],
+ ['圆柱',{t:'cylcone',kind:'cyl'}],
+ ['圆锥',{t:'cylcone',kind:'cone'}],
+ ['钟表（3 时整）',{t:'clock',hh:3,mm:0,ang:90}],
+ ['国际象棋棋盘（剪对角）',{t:'chess',cut:['tl','br']}],
+ ['三阶幻方',{t:'magic',g:[[2,7,6],[9,5,1],[4,3,8]],hl:[1,1]}],
+ ['辐射型数阵',{t:'radial',n:6,center:'?'}],
+ ['T 形数阵',{t:'tnum'}],
+ ['三角三边数阵',{t:'triRing',vals:[1,2,3,4,5,6]}],
+ ['杨辉三角',{t:'pascal'}],
+ ['台阶（上楼梯）',{t:'steps',n:6,tag:'10 级台阶'}],
+ ['行程线段图（二次相遇）',{t:'line',x1:24,x2:216,y:90,marks:[[72,90,'#f87171','P1'],[144,90,'#3b82f6','P2']],tags:[[18,78,'A'],[214,78,'B']]}],
+ ['环形跑道',{t:'ring',pts:[[120,13,'#f87171','甲'],[120,157,'#3b82f6','乙']]}],
+ ['方格计数',{t:'grid',m:4,n:4,note:'4×4 方格'}]
+];
+var g=document.getElementById('g');
+samples.forEach(function(s){
+  var d=document.createElement('div');d.className='card';
+  d.innerHTML='<div class="t">'+s[0]+'</div>'+window.FIG(s[1]);
+  g.appendChild(d);
+});
+</script>
+</body>
+</html>

@@ -2,6 +2,7 @@
 (function(){
   const $ = s => document.querySelector(s);
   const $$ = s => Array.from(document.querySelectorAll(s));
+  const figOf = q => (q && q.fig && window.FIG) ? window.FIG(q.fig) : '';
   function esc(s){ return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function stars(n){ return '★'.repeat(n) + '☆'.repeat(5-n); }
   function toast(msg){
@@ -139,6 +140,7 @@
   }
   function renderExample(s, topicId, secIdx){
     return `<div class="exbox"><div class="ex-q">📝 ${esc(s.q)}</div>
+      ${s.fig ? window.FIG(s.fig) : ''}
       ${s.think?`<div class="thinkline">💭 <b>思路点拨：</b>${esc(s.think)}</div>`:''}
       <div><button class="btn sm show-sol">显示答案与解析</button></div>
       <div class="sol"><b>答案：</b>${esc(s.a)}<br><b>解析：</b>${esc(s.sol)}</div>
@@ -234,6 +236,7 @@
           <span class="muted" style="margin-left:auto;font-size:12px">#${q.id}</span>
         </div>
         <div class="q-text">${esc(q.q)}</div>
+        ${figOf(q)}
         ${q.opts ? `<div class="q-options">${q.opts.map((o,i)=>`<label><input type="radio" name="bq${q.id}" disabled>${esc(String.fromCharCode(65+i))}. ${esc(o)}</label>`).join('')}</div>` : ''}
         <div style="display:flex;gap:8px">
           <button class="btn sm toggle-ans">查看答案与解析</button>
@@ -302,6 +305,7 @@
         </div>
         <div class="practice-progress"><i style="width:${session.idx/session.list.length*100}%"></i></div>
         <div class="q-text" style="font-size:16px;font-weight:600;margin:10px 0">${esc(q.q)}</div>
+        ${figOf(q)}
         <div id="answerZone"></div>
         <div id="feedbackZone"></div>
       </div>`;
@@ -405,6 +409,7 @@
         <div class="body">
           <div class="q-head"><span class="tag">${esc(topic.name)}</span><span class="tag diff">${stars(q.diff)}</span><span class="muted small">错 ${w.cnt} 次 · 最近 ${esc(w.last)}</span></div>
           <div class="q-text">${esc(q.q)}</div>
+          ${figOf(q)}
           <div style="display:flex;gap:8px">
             <button class="btn sm redo-one">重做此题</button>
             <button class="btn sm show-one">查看解析</button>
